@@ -93,7 +93,7 @@ void FreeSets(Set* set)
 
 typedef struct TOKEN
 {
-    struct TOKEN* prevOperand;
+    struct TOKEN* prevToken;
     struct TOKEN* lvalue;
     struct TOKEN* rvalue;
 
@@ -104,7 +104,7 @@ typedef struct TOKEN
     struct TOKEN* prevCreated;
 } Token;
 
-Token* CreateToken(TokenType type, Set* set, int priority)
+Token* CreateToken(TokenType type, Set* set)
 {
     static Token* lastCreatedToken = 0;
     Token* newToken = malloc(sizeof(Token));
@@ -112,7 +112,7 @@ Token* CreateToken(TokenType type, Set* set, int priority)
     newToken->type = type;
     newToken->set = set;
     newToken->prevCreated = lastCreatedToken;
-    newToken->priority = priority;
+    newToken->priority = 0;
     lastCreatedToken = newToken;
     return newToken;
 }
@@ -125,22 +125,24 @@ void FreeTokens(Token* token)
     --mlocCount;
 }
 
-void AddToTokenTree(Token* lastOperand, Token* newOperand)
+void AddToTokenTree(Token* lastToken, Token* newToken)
 {
-    if(lastOperand->type >= newOperand->type)
+    if (lastToken == 0)
+        return;
+    if(lastToken->type >= newToken->type)
     {
-        newOperand->lvalue = lastOperand->rvalue;
-        lastOperand->rvalue = newOperand;
-        newOperand->prevOperand = lastOperand;
+        newToken->lvalue = lastToken->rvalue;
+        lastToken->rvalue = newToken;
+        newToken->prevToken = lastToken;
     }
-    else if (lastOperand->prevOperand != 0)
+    else if (lastToken->prevToken != 0)
     {
-        AddToTokenTree(lastOperand->prevOperand, newOperand);
+        AddToTokenTree(lastToken->prevToken, newToken);
     }
     else
     {
-        newOperand->lvalue = lastOperand;
-        lastOperand->prevOperand = newOperand;
+        newToken->lvalue = lastToken;
+        lastToken->prevToken = newToken;
     }
 }
 
@@ -152,6 +154,7 @@ void Strip(char** head)
 char* CopyStr(char* start, char* end)
 {
     char* str = calloc(end-start+1,sizeof(char));
+    ++mlocCount;
     for(int i = 0;i < end - start;++i)
         str[i] = start[i];
     str[end-start] = 0;
@@ -179,8 +182,7 @@ Token* GetVariable(char** head)
 
     }
     *head = end;
-    Strip(head);
-    return CreateToken(TTVariable,set,0);
+    return CreateToken(TTVariable,set);
 }
 
 TokenType GetTokenType(char** head)
@@ -202,52 +204,43 @@ TokenType GetTokenType(char** head)
         }
     }
     (*head) += maxLength;
-    Strip(head);
     return tokenType;
 }
 
-Token* GetNextToken(char** head, int* priority)
+Token* GetNextToken(char** head)
 {
+    Strip(head);
     if(**head==0)
-        return 0;
+        return CreateToken(TTEOF,0);
     TokenType type = GetTokenType(head);
     if (type == TTVariable)
         return GetVariable(head);
-    else if(type == TTOpenBracket)
-    {
-        ++(*priority);
-        return GetNextToken(head,priority);
-    }
-    else if(type == TTCloseBracket)
-    {
-        --(*priority);
-        return GetNextToken(head,priority);
-    }
     else
-        return CreateToken(type, 0,*priority);
+        return CreateToken(type, 0);
 }
 
 Token* GetTokenTree(char* head)
 {
-    int priority;
-    Strip(&head);
-    Token* firstVariable = GetNextToken(&head,&priority);
-    Token* lastOperand = GetNextToken(&head,&priority);
-    lastOperand->rvalue = GetNextToken(&head,&priority);
-    lastOperand->lvalue = firstVariable;
+    int priority = 0;
+    Token* lastToken = 0;
+    Token* nextToken = GetNextToken(&head);
 
-
-    Token* nextOperand;
-    while((*head)!=0)
+    while(nextToken->type != TTEOF)
     {
-        nextOperand = GetNextToken(&head,&priority);
-        nextOperand->rvalue = GetNextToken(&head,&priority);
-        AddToTokenTree(lastOperand,nextOperand);
-        lastOperand = nextOperand;
+        if((nextToken->type == TTOpenBracket) || (nextToken->type == TTCloseBracket))
+        {
+            priority += nextToken->type == TTOpenBracket ? 1 : -1;
+            nextToken = GetNextToken(&head);
+            continue;
+        }
+        nextToken->priority = priority;
+        AddToTokenTree(lastToken,nextToken);
+        lastToken = nextToken;
+        nextToken = GetNextToken(&head);
     }
-    while(lastOperand->prevOperand)
-        lastOperand = lastOperand->prevOperand;
-    return lastOperand;
+    while(lastToken->prevToken)
+        lastToken = lastToken->prevToken;
+    return lastToken;
 }
 
 int main()
@@ -259,7 +252,7 @@ int main()
     char* head = s;
     while(*head!=0)
     {
-        t = operators[GetNextToken(&head,&c)->type];
+        t = operators[GetNextToken(&head)->type];
         printf("%s %d\n", t, c);
     }
 /*     char s[101];
@@ -270,7 +263,7 @@ int main()
         printf("%d  %d  %d  %d",s[0],s[1],s[2],s[3]);
     }
     while(0); */
-    FreeTokens(CreateToken(0,0,0));
+    FreeTokens(CreateToken(0,0));
     FreeSets(sets);
     printf("\n------%d------",mlocCount);
 }
