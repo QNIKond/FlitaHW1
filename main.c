@@ -20,7 +20,10 @@ typedef enum
 } TokenType;
 
 #define ISLETTER(X) (((X>='A')&&(X<='Z')) || ((X>='a')&&(X<='z')) || (X=='_'))
-#define ISLETTERORNUM(X) (((X>='0')&&(X<='9')) || ISLETTER(X))
+#define ISNUM(X) ((X>='0')&&(X<='9'))
+#define ISLETTERORNUM(X) (ISLETTER(X) || ISNUM(X))
+
+#define MAXSETSIZE 48
 
 typedef struct SET
 {
@@ -38,12 +41,12 @@ Set* GetLastSet(Set* set)
     return set;
 }
 
-Set* CreateSet(char* name)
+Set* CreateSet(char* name, int* data)
 {
     Set* set = malloc(sizeof(Set));
     ++mlocCount;
     set->name = name;
-    set->data = 0;
+    set->data = data;
     set->nextSet = 0;
     if (sets)
         GetLastSet(sets)->nextSet = set;
@@ -160,10 +163,54 @@ char* CopyStr(char* start, char* end)
     str[end-start] = 0;
     return str;
 }
+int GetNumber(char** end)
+{
+    Strip(end);
+    int number = 0;
+    while(ISNUM(**end))
+    {
+        number = number*10 + **end - (int)'0';
+        ++(*end);
+    }
+    return number;
+}
+
+void PlaceNumberInSet(int* data,int* size, int n)
+{
+    int* ptr = data;
+    while ((*ptr < n) && (ptr - data < *size))
+        ++ptr;
+    if ((ptr - data == *size) || (*ptr != n))
+    {
+        for(int* i = data + *size; i>ptr; --i)
+            *i = *(i-1);
+        *ptr = n;
+        ++(*size);
+    }
+}
 
 Token* GetConstant(char** head)
 {
-    return 0;
+    int filled = 0;
+    int size = 16;
+    int* data = malloc(size*sizeof(int));
+    ++mlocCount;
+    char* end = *head + 1;
+    PlaceNumberInSet(data, &filled, GetNumber(&end));
+    Strip(&end);
+    while(*end != '}')
+    {
+        ++end;
+        PlaceNumberInSet(data, &filled, GetNumber(&end));
+        Strip(&end);
+        if (size - filled < 3)
+        {
+            size *= 2;
+            data = realloc(data, size*sizeof(int));
+        }
+    }
+    *head = end + 1;
+    return CreateToken(TTVariable, CreateSet(0,data));
 }
 
 Token* GetVariable(char** head)
@@ -178,7 +225,7 @@ Token* GetVariable(char** head)
     Set* set = FindSet(*head);
     if (set==0)
     {
-        set = CreateSet(CopyStr(*head,end));
+        set = CreateSet(CopyStr(*head,end), 0);
 
     }
     *head = end;
@@ -245,15 +292,15 @@ Token* GetTokenTree(char* head)
 
 int main()
 {
-    const char* t;
-    int c = 0;
+    int* t;
     const char* operators[9] = {"(",")","&","|","/","=","count","unknown","var"};
-    char* s = "var1 = a | b&c | (d | e)";
+    char* s = "{93, 29, 65, 45, 71, 35, 69, 32, 2, 25, 45, 32, 36, 76, 98, 35, 7, 12, 13, 12}";
     char* head = s;
     while(*head!=0)
     {
-        t = operators[GetNextToken(&head)->type];
-        printf("%s %d\n", t, c);
+        t = GetConstant(&head)->set->data;
+        printf("%d %d %d\n", t[0],t[1],t[2]);
+        fflush(stdout);
     }
 /*     char s[101];
     do
@@ -266,4 +313,5 @@ int main()
     FreeTokens(CreateToken(0,0));
     FreeSets(sets);
     printf("\n------%d------",mlocCount);
+
 }
