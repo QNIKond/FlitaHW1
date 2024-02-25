@@ -1,9 +1,11 @@
 #include "SetsTable.h"
 #include <malloc.h>
 
+#define DEFAULTSIZE 16
+
 Set* sets;
 
-Set* CreateSet(char* name, int* data)
+Set* CreateSet(char* name)
 {
     static Set* lastSet = 0;
     Set* set = malloc(sizeof(Set));
@@ -11,7 +13,9 @@ Set* CreateSet(char* name, int* data)
         sets = set;
     //++mlocCount;
     set->name = name;
-    set->data = data;
+    set->data = calloc(DEFAULTSIZE,sizeof(int));
+    set->filled = 0;
+    set->size = DEFAULTSIZE;
     set->nextSet = 0;
     if(lastSet)
         lastSet->nextSet = set;
@@ -29,7 +33,7 @@ char* CopyStr(char* start, int length)
     return str;
 }
 
-Set* GetSet(char* name,int length)
+Set* FindSet(char* name, int length)
 {
     Set* currentSet = sets;
     int i;
@@ -50,8 +54,46 @@ Set* GetSet(char* name,int length)
         currentSet = currentSet->nextSet;
     }
     if (!result)
-        result = CreateSet(CopyStr(name,length), 0);
+        result = CreateSet(CopyStr(name,length));
     return result;
+}
+
+void PlaceNumberInSet(Set* set, int n)
+{
+    if(set->size - set->filled <= 2)
+    {
+        set->size *= 2;
+        set->data = realloc(set->data,DEFAULTSIZE*sizeof(int));
+    }
+    int* ptr = set->data;
+    while ((*ptr < n) && (ptr - set->data < set->filled))
+        ++ptr;
+    if ((ptr - set->data == set->filled) || (*ptr != n))
+    {
+        for(int* i = set->data + set->filled; i>ptr; --i)
+            *i = *(i-1);
+        *ptr = n;
+        ++(set->filled);
+    }
+}
+
+Set* CreateUnnamedCopy(Set* set)
+{
+    Set* newSet = CreateSet(0);
+    newSet->filled = set->filled;
+    newSet->size = set->size;
+
+    newSet->data = calloc(newSet->size,sizeof(int));
+    for(int i = 0; i < set->filled; ++i)
+        newSet->data[i] = set->data[i];
+    return newSet;
+}
+
+void ReplaceData(Set* set, int* data)
+{
+    if(set->data)
+        free(set->data);
+    set->data = data;
 }
 
 void RecursivelyFreeSets(Set* set)
