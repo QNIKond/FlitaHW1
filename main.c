@@ -3,14 +3,16 @@
 
 int mlocCount = 0;
 
+//Types that are lower in list have higher priority and lower position in tree
 typedef enum
 {
     TTOpenBracket,
     TTCloseBracket,
-    TTAnd,
-    TTOr,
-    TTExcept,
+
     TTEqual,
+    TTExcept,
+    TTOr,
+    TTAnd,
 
     TTCount,
     TTUnknown,
@@ -64,12 +66,14 @@ Set* FindSet(char* name)
     while(currentSet)
     {
         i = 0;
-        while((name[i] == currentSet->name[i]) && (name[i] != 0))
-            ++i;
-        if((currentSet->name[i] == 0) && (i > maxLength))
+        if (currentSet->name)
         {
-            maxLength = i;
-            result = currentSet;
+            while ((name[i] == currentSet->name[i]) && (name[i] != 0))
+                ++i;
+            if ((currentSet->name[i] == 0) && (i > maxLength)) {
+                maxLength = i;
+                result = currentSet;
+            }
         }
         currentSet = currentSet->nextSet;
     }
@@ -112,10 +116,9 @@ Token* CreateToken(TokenType type, Set* set)
     static Token* lastCreatedToken = 0;
     Token* newToken = malloc(sizeof(Token));
     ++mlocCount;
-    newToken->type = type;
-    newToken->set = set;
-    newToken->prevCreated = lastCreatedToken;
-    newToken->priority = 0;
+    Token toAssign = {0,0,0,0,type,set,lastCreatedToken};
+    *newToken =  toAssign;
+
     lastCreatedToken = newToken;
     return newToken;
 }
@@ -130,9 +133,11 @@ void FreeTokens(Token* token)
 
 void AddToTokenTree(Token* lastToken, Token* newToken)
 {
+
     if (lastToken == 0)
         return;
-    if(lastToken->type >= newToken->type)
+    if((lastToken->priority < newToken->priority) ||
+    ((lastToken->priority == newToken->priority) && (lastToken->type <= newToken->type)))
     {
         newToken->lvalue = lastToken->rvalue;
         lastToken->rvalue = newToken;
@@ -234,7 +239,7 @@ Token* GetVariable(char** head)
 
 TokenType GetTokenType(char** head)
 {
-    const char* operators[TTCount] = {"(",")","&","|","/","="};
+    const char* operators[TTCount] = {"(",")","=","/","|","&"};
 
     TokenType tokenType = TTVariable;
     int maxLength = 0;
@@ -292,16 +297,14 @@ Token* GetTokenTree(char* head)
 
 int main()
 {
-    int* t;
+    Token* t;
     const char* operators[9] = {"(",")","&","|","/","=","count","unknown","var"};
-    char* s = "{93, 29, 65, 45, 71, 35, 69, 32, 2, 25, 45, 32, 36, 76, 98, 35, 7, 12, 13, 12}";
+    char* s = "A={1,3,4,5}/B";
     char* head = s;
-    while(*head!=0)
-    {
-        t = GetConstant(&head)->set->data;
-        printf("%d %d %d\n", t[0],t[1],t[2]);
-        fflush(stdout);
-    }
+    t = GetTokenTree(head);
+    //printf("%d %d %d\n", t[0],t[1],t[2]);
+    fflush(stdout);
+
 /*     char s[101];
     do
     {
