@@ -2,21 +2,43 @@
 #include <stdlib.h>
 #include "SyntaxAnalyzer.h"
 #include "TokenTreeExecutor.h"
+#include "ExceptionHandler.h"
+
+void PrintErrorMessage(const char* prefix)
+{
+    const char* errorMessage;
+    const char* errorMod;
+    char* errorPosition;
+    errorMessage = GetExceptionInfo(&errorMod,&errorPosition);
+    printf(prefix);
+    printf(errorMessage, errorMod);
+    printf("\n");
+    fflush(stdout);
+}
 
 int main()
 {
-    char s[100] = "Art = {}";
-    //char s[100];
+    //char s[100] = "Art = {}";
+    char s[100];
     const Set* set;
     while(1) {
-       //fgets(s,100,stdin);
+       CheckException();
+        fgets(s,100,stdin);
         if(s[0]=='`')
             break;
-        Token* t = BuildTokenTree(s);
-        ExecuteTree(t);
+        Token* tree = BuildTokenTree(s);
+        if (IsException()) {
+            PrintErrorMessage("Syntax error: ");
+            continue;
+        }
+        ExecuteTree(tree);
+        if (IsException()) {
+            PrintErrorMessage("Semantic error: ");
+            continue;
+        }
         ClearAnonymousAndEmptySets();
         set = GetSetsTable();
-        system("cls");
+        //system("cls");
         printf("----------------------\n");
         printf("Sets list:\n\n");
         while (set) {
@@ -30,6 +52,7 @@ int main()
             set = set->nextSet;
         }
         printf("----------------------\n");
+        fflush(stdout);
     }
     FreeTokens();
     FreeSets();

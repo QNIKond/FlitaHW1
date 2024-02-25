@@ -1,5 +1,6 @@
 #include "TokenTreeExecutor.h"
 #include "Token.h"
+#include "ExceptionHandler.h"
 
 Set* ExecAnd(Set* lvalue, Set* rvalue)
 {
@@ -39,6 +40,8 @@ Set* ExecExcept(Set* lvalue, Set* rvalue)
 }
 Set* ExecEqual(Set* lvalue, Set* rvalue)
 {
+    if(!lvalue->name)
+        THROWEX(1,"named set")
     ReplaceData(lvalue,rvalue);
     return lvalue;
 }
@@ -55,15 +58,16 @@ Set* Execute(Set* lvalue, Set* rvalue,TokenType operator)
 }
 
 void TestNode(Token* node){}
-Set* ExecuteNode(Token* node)
+Set* ExecuteTree(Token* node)
 {
-    if(node->type==TTVariable)
+    if(node->type==TTVariable) {
+        if (node->lvalue || node->rvalue)
+            THROWEX(1,"operator")
         return node->set;
-    return Execute(ExecuteNode(node->lvalue),ExecuteNode(node->rvalue),node->type);
-}
-
-Set* ExecuteTree(Token* tree)
-{
-    TestNode(tree);
-    return ExecuteNode(tree);
+    }
+    if(!node->lvalue || !node->rvalue )
+        THROWEX(2,0)
+    Set* lvalue = ExecuteTree(node->lvalue); CHECKEX
+    Set* rvalue = ExecuteTree(node->rvalue); CHECKEX
+    return Execute(lvalue,rvalue, node->type);
 }

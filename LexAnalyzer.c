@@ -1,4 +1,5 @@
 #include "LexAnalyzer.h"
+#include "ExceptionHandler.h"
 
 #define ISLETTER(X) (((X>='A')&&(X<='Z')) || ((X>='a')&&(X<='z')) || (X=='_'))
 #define ISNUM(X) ((X>='0')&&(X<='9'))
@@ -55,18 +56,21 @@ Token* TryConstants(char** head)
     if(!TrySymbol(&end,'{'))
         return 0;
     Set* set = CreateSet(0);
-    if(!TryNumber(&end, &nextNumber))
-        if(TrySymbol(&end,'}'))
-        {
+    if(!TryNumber(&end, &nextNumber)) {
+        if (TrySymbol(&end, '}')) {
             *head = end;
             return CreateToken(TTVariable, set);
+        } else {
+            THROWEX(1, "number")
         }
+    }
 
     PlaceNumberInSet(set, nextNumber);
     while(*end != '}')
     {
-        TrySymbol(&end,',');
-        TryNumber(&end, &nextNumber);
+        TrySymbol(&end,','); CHECKEX
+        if(!TryNumber(&end, &nextNumber))
+            THROWEX(1, "number")
         PlaceNumberInSet(set, nextNumber);
     }
     *head = end + 1;
@@ -119,9 +123,10 @@ Token* GetNextToken(char** head)
 
     Token* nextToken = TryKeyWords(head);
     if (!nextToken)
-        nextToken = TryConstants(head);
+        nextToken = TryConstants(head); CHECKEX
     if (!nextToken)
         nextToken = TryVariables(head);
-
+    if (!nextToken)
+        THROWEX(3, 0)
     return nextToken;
 }

@@ -1,6 +1,7 @@
 #include "SyntaxAnalyzer.h"
 #include "Token.h"
 #include "LexAnalyzer.h"
+#include "ExceptionHandler.h"
 
 void AddToTokenTree(Token* lastToken, Token* newToken)
 {
@@ -29,20 +30,20 @@ Token* BuildTokenTree(char* head)
 {
     int priority = 0;
     Token* lastToken = 0;
-    Token* nextToken = GetNextToken(&head);
+    Token* nextToken = GetNextToken(&head); CHECKEX
 
     while(nextToken->type != TTEOF)
     {
         if((nextToken->type == TTOpenBracket) || (nextToken->type == TTCloseBracket))
         {
             priority += nextToken->type == TTOpenBracket ? 1 : -1;
-            nextToken = GetNextToken(&head);
+            nextToken = GetNextToken(&head); CHECKEX
             continue;
         }
         nextToken->priority = priority;
         AddToTokenTree(lastToken,nextToken);
         lastToken = nextToken;
-        nextToken = GetNextToken(&head);
+        nextToken = GetNextToken(&head); CHECKEX
     }
     while(lastToken->prevToken)
         lastToken = lastToken->prevToken;
