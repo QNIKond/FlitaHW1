@@ -1,4 +1,4 @@
 #pragma once
 #include "Token.h"
 
-Token* GetTokenTree(char* head);
+Token* BuildTokenTree(char* head);

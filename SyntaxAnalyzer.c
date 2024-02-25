@@ -25,7 +25,7 @@ void AddToTokenTree(Token* lastToken, Token* newToken)
     }
 }
 
-Token* GetTokenTree(char* head)
+Token* BuildTokenTree(char* head)
 {
     int priority = 0;
     Token* lastToken = 0;

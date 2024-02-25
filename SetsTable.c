@@ -7,11 +7,13 @@ Set* CreateSet(char* name, int* data)
 {
     static Set* lastSet = 0;
     Set* set = malloc(sizeof(Set));
+    if(!sets)
+        sets = set;
     //++mlocCount;
     set->name = name;
     set->data = data;
     set->nextSet = 0;
-    if (lastSet)
+    if(lastSet)
         lastSet->nextSet = set;
     lastSet = set;
     return set;

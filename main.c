@@ -8,7 +8,7 @@ int main()
     char* s = "A={1,3,4,5}/B";
     char* head = s;
 
-
+    Token* t = BuildTokenTree(head);
     FreeTokens();
     FreeSets();
 
