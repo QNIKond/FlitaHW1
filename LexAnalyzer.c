@@ -4,45 +4,77 @@
 #define ISNUM(X) ((X>='0')&&(X<='9'))
 #define ISLETTERORNUM(X) (ISLETTER(X) || ISNUM(X))
 
+char* lexems[TTCount] = {0};
+
+void BuildLexemsArray()
+{
+    lexems[TTOpenBracket] = "(";
+    lexems[TTCloseBracket] = ")";
+    lexems[TTEqual] = "=";
+    lexems[TTExcept] = "/";
+    lexems[TTOr] = "|";
+    lexems[TTAnd] = "&";
+}
+
 void Strip(char** head)
 {
     while((**head==' ')||(**head=='\n')||(**head=='\t'))
         ++(*head);
 }
 
-int GetNumber(char** end)
+int TryNumber(char** end, int* number)
 {
+    if(!ISNUM(**end))
+        return 0;
     Strip(end);
-    int number = 0;
+    *number = 0;
     while(ISNUM(**end))
     {
-        number = number*10 + **end - (int)'0';
+        *number = (*number)*10 + **end - (int)'0';
         ++(*end);
     }
-    return number;
+    return 1;
 }
 
-
-Token* GetConstant(char** head)
+int TrySymbol(char** head, char symbol)
 {
+    Strip(head);
+    if(**head == symbol)
+    {
+        ++(*head);
+        Strip(head);
+        return 1;
+    }
+    return 0;
+}
+
+Token* TryConstants(char** head)
+{
+    int nextNumber = 0;
+    char* end = *head;
+    if(!TrySymbol(&end,'{'))
+        return 0;
     Set* set = CreateSet(0);
-    char* end = *head + 1;
-    PlaceNumberInSet(set, GetNumber(&end));
-    Strip(&end);
+    if(!TryNumber(&end, &nextNumber))
+        if(TrySymbol(&end,'}'))
+        {
+            *head = end;
+            return CreateToken(TTVariable, set);
+        }
+
+    PlaceNumberInSet(set, nextNumber);
     while(*end != '}')
     {
-        ++end;
-        PlaceNumberInSet(set, GetNumber(&end));
-        Strip(&end);
+        TrySymbol(&end,',');
+        TryNumber(&end, &nextNumber);
+        PlaceNumberInSet(set, nextNumber);
     }
     *head = end + 1;
     return CreateToken(TTVariable, set);
 }
 
-Token* GetVariable(char** head)
+Token* TryVariables(char** head)
 {
-    if(**head=='{')
-        return GetConstant(head);
     if(!ISLETTER(**head))
         return 0;
     char* end = *head;
@@ -54,26 +86,29 @@ Token* GetVariable(char** head)
     return CreateToken(TTVariable,set);
 }
 
-TokenType GetTokenType(char** head)
+Token* TryKeyWords(char** head)
 {
-    const char* operators[TTCount] = {"(",")","=","/","|","&"};
+    if(!lexems[0])
+        BuildLexemsArray();
 
-    TokenType tokenType = TTVariable;
+    TokenType tokenType = TTUnknown;
     int maxLength = 0;
     int j;
     for(int i = 0; i < TTCount; ++i)
     {
         j = 0;
-        while(((*head)[j]==operators[i][j])&&((*head)[j]!=0))
+        while(((*head)[j]==lexems[i][j])&&((*head)[j]!=0))
             ++j;
-        if ((operators[i][j]==0)&&(j>maxLength))
+        if ((lexems[i][j]==0)&&(j>maxLength))
         {
             maxLength = j;
             tokenType = i;
         }
     }
+    if(tokenType == TTUnknown)
+        return 0;
     (*head) += maxLength;
-    return tokenType;
+    return CreateToken(tokenType,0);
 }
 
 Token* GetNextToken(char** head)
@@ -81,9 +116,12 @@ Token* GetNextToken(char** head)
     Strip(head);
     if(**head==0)
         return CreateToken(TTEOF,0);
-    TokenType type = GetTokenType(head);
-    if (type == TTVariable)
-        return GetVariable(head);
-    else
-        return CreateToken(type, 0);
+
+    Token* nextToken = TryKeyWords(head);
+    if (!nextToken)
+        nextToken = TryConstants(head);
+    if (!nextToken)
+        nextToken = TryVariables(head);
+
+    return nextToken;
 }
