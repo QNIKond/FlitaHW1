@@ -6,7 +6,7 @@
 
 void Strip(char** head)
 {
-    while((**head==' ')||(**head=='\t'))
+    while((**head==' ')||(**head=='\n')||(**head=='\t'))
         ++(*head);
 }
 

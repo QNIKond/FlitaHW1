@@ -39,7 +39,7 @@ Set* ExecExcept(Set* lvalue, Set* rvalue)
 }
 Set* ExecEqual(Set* lvalue, Set* rvalue)
 {
-    ReplaceData(lvalue,rvalue->data);
+    ReplaceData(lvalue,rvalue);
     return lvalue;
 }
 
@@ -50,8 +50,8 @@ Set* Execute(Set* lvalue, Set* rvalue,TokenType operator)
         case TTExcept: return ExecExcept(lvalue,rvalue);
         case TTOr: return ExecOr(lvalue,rvalue);
         case TTAnd: return ExecAnd(lvalue,rvalue);
+        default: return 0;
     }
-    return 0;
 }
 
 void TestNode(Token* node){}

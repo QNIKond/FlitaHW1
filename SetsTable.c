@@ -3,25 +3,34 @@
 
 #define DEFAULTSIZE 16
 
-Set* sets;
+Set* setsTable = 0;
 
 Set* CreateSet(char* name)
 {
-    static Set* lastSet = 0;
     Set* set = malloc(sizeof(Set));
-    if(!sets)
-        sets = set;
+    Set* lastSet = setsTable;
+
     //++mlocCount;
     set->name = name;
     set->data = calloc(DEFAULTSIZE,sizeof(int));
     set->filled = 0;
     set->size = DEFAULTSIZE;
     set->nextSet = 0;
-    if(lastSet)
+
+    if(!setsTable)
+    {
+        setsTable = set;
+    }
+    else
+    {
+        while(lastSet->nextSet)
+            lastSet = lastSet->nextSet;
         lastSet->nextSet = set;
-    lastSet = set;
+    }
     return set;
 }
+
+const Set* GetSetsTable() {return setsTable;}
 
 char* CopyStr(char* start, int length)
 {
@@ -35,7 +44,7 @@ char* CopyStr(char* start, int length)
 
 Set* FindSet(char* name, int length)
 {
-    Set* currentSet = sets;
+    Set* currentSet = setsTable;
     int i;
     int maxLength = 0;
     Set* result = 0;
@@ -89,32 +98,74 @@ Set* CreateUnnamedCopy(Set* set)
     return newSet;
 }
 
-void ReplaceData(Set* set, int* data)
+void ReplaceData(Set* set, Set* source)
 {
+    if(set->data) {
+        if (source->size > set->size) {
+            realloc(set->data, source->size * sizeof(int));
+            set->size = source->size;
+        }
+    }
+    else {
+        set->data = calloc(source->size, sizeof(int));
+        set->size = source->size;
+    }
+    for(int i = 0; i < source->filled; ++i)
+        set->data[i] = source->data[i];
+    set->filled = source->filled;
+}
+
+void FreeSet(Set* set)
+{
+    if(set->name)
+        free(set->name);
     if(set->data)
         free(set->data);
-    set->data = data;
+    free(set);
+}
+
+void PopSet(Set* prev,Set** set)
+{
+    Set* nextSet = (*set)->nextSet;
+    FreeSet(*set);
+    if(prev)
+        prev->nextSet = nextSet;
+    *set = nextSet;
+}
+
+void ClearAnonymousAndEmptySets()
+{
+    while(setsTable && (!setsTable->data) || (!setsTable->name))
+        PopSet(0, &setsTable);
+
+    if(!setsTable)
+        return;
+
+    Set* prev = setsTable;
+    Set* set = setsTable->nextSet;
+    while(set)
+    {
+        if((!set->data)||(!set->name))
+        {
+            PopSet(prev, &set);
+        }
+        else if(set)
+        {
+            prev = set;
+            set = set->nextSet;
+        }
+    }
 }
 
 void RecursivelyFreeSets(Set* set)
 {
     if(set->nextSet)
         RecursivelyFreeSets(set->nextSet);
-    if(set->name)
-    {
-        free(set->name);
-        //--mlocCount;
-    }
-    if(set->data)
-    {
-        free(set->data);
-        //--mlocCount;
-    }
-    free(set);
-    //--mlocCount;
+    FreeSet(set);
 }
 
 void FreeSets()
 {
-    RecursivelyFreeSets(sets);
+    if(setsTable)
+        RecursivelyFreeSets(setsTable);
 }
