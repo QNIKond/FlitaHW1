@@ -1,40 +1,34 @@
-#include "ExceptionHandler.h"
+#include "../Headers/ExceptionHandler.h"
 
 int memAllocCount = 0;
 
-char* exceptionMessages[] = {"", "Expected number","Missing argument","Uknown lexem",
+char *exceptionMessages[] = {"", "Expected number", "Missing argument", "Uknown lexem",
                              "Expected named set", "Expected operator", "Number is too big"};
 
 int exceptionCode = 0;
 int exceptionPosition;
 
-int IsException()
-{
+int IsException() {
     return exceptionCode;
 }
 
-const char* GetExceptionInfo(int* position)
-{
+const char *GetExceptionInfo(int *position) {
     *position = exceptionPosition;
     return exceptionMessages[exceptionCode];
 }
 
-void* ThrowException(int exCode, int position)
-{
-    if(!exceptionCode)
-    {
+void *ThrowException(int exCode, int position) {
+    if (!exceptionCode) {
         exceptionCode = exCode;
         exceptionPosition = position;
     }
     return 0;
 }
 
-void CheckExceptions()
-{
+void CheckExceptions() {
     exceptionCode = 0;
 }
 
-int* GetMemAllocCount()
-{
+int *GetMemAllocCount() {
     return &memAllocCount;
 }

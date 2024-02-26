@@ -4,4 +4,4 @@ void RedrawPage();
 
 void ShowExceptionMessage();
 
-void GetInput(char* s);
+void GetInput(char *s);

@@ -1,8 +1,8 @@
 #pragma once
+
 #include "SetsTable.h"
 
-typedef enum
-{
+typedef enum {
     TTOpenBracket,
     TTCloseBracket,
 
@@ -21,22 +21,21 @@ typedef enum
 
 } TokenType;
 
-typedef struct TOKEN
-{
-    struct TOKEN* prevToken;
-    struct TOKEN* lvalue;
-    struct TOKEN* rvalue;
+typedef struct TOKEN {
+    struct TOKEN *prevToken;
+    struct TOKEN *lvalue;
+    struct TOKEN *rvalue;
 
     int priority;
     TokenType type;
-    Set* set;
+    Set *set;
 
     int lexemPosition;
 
-    struct TOKEN* prevCreated;
+    struct TOKEN *prevCreated;
 } Token;
 
-Token* CreateToken(TokenType type, Set* set);
+Token *CreateToken(TokenType type, Set *set);
 
 void FreeTokens();
 

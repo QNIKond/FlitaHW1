@@ -1,12 +1,11 @@
-#include "Interface.h"
+#include "../Headers/Interface.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "SetsTable.h"
-#include "ExceptionHandler.h"
+#include "../Headers/Structures/SetsTable.h"
+#include "../Headers/ExceptionHandler.h"
 
-void PrintSets()
-{
-    const Set* set = GetSetsTable();
+void PrintSets() {
+    const Set *set = GetSetsTable();
     printf("----------------------\n");
     printf("Sets list:\n\n");
     while (set) {
@@ -23,27 +22,24 @@ void PrintSets()
     fflush(stdout);
 }
 
-void RedrawPage()
-{
+void RedrawPage() {
     system("cls");
     PrintSets();
 }
 
-void ShowExceptionMessage()
-{
-    const char* errorMessage;
+void ShowExceptionMessage() {
+    const char *errorMessage;
     int errorPosition;
     errorMessage = GetExceptionInfo(&errorPosition);
-    printf("%*s",errorPosition+2,"^\n");
-    printf("%*s",errorPosition+2,"|\n");
+    printf("%*s", errorPosition + 2, "^\n");
+    printf("%*s", errorPosition + 2, "|\n");
     printf("Error: ");
     printf(errorMessage);
     printf("\n");
     fflush(stdout);
 }
 
-void GetInput(char* s)
-{
-    fgets(s,1000,stdin);
+void GetInput(char *s) {
+    fgets(s, 1000, stdin);
     fflush(stdin);
 }

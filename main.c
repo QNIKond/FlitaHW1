@@ -1,62 +1,57 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "TokenTreeExecutor.h"
-#include "ExceptionHandler.h"
-#include "Interface.h"
+#include "Headers/Builders/TokenTreeExecutor.h"
+#include "Headers/ExceptionHandler.h"
+#include "Headers/Interface.h"
 
-void SaveSets()
-{
+void SaveSets() {
     ClearAnonymousAndEmptySets();
-    const Set* sets = GetSetsTable();
-    if(!sets)
+    const Set *sets = GetSetsTable();
+    if (!sets)
         return;
 
-    FILE* f = fopen("sets.txt","w");
+    FILE *f = fopen("sets.txt", "w");
     while (sets) {
         fprintf(f, "%s = {%d", sets->name, sets->data[0]);
         for (int i = 1; i < sets->filled; ++i) {
-            fprintf(f,", %d", sets->data[i]);
+            fprintf(f, ", %d", sets->data[i]);
         }
-        fprintf(f,"}\n");
+        fprintf(f, "}\n");
         sets = sets->prevSet;
     }
     fclose(f);
 }
 
-void LoadSets()
-{
-    FILE* f = fopen("sets.txt","r");
+void LoadSets() {
+    FILE *f = fopen("sets.txt", "r");
     char s[1000];
-    while(fgets(s,1000,f))
-    {
+    while (fgets(s, 1000, f)) {
         TryExecute(s);
     }
     fclose(f);
 }
 
-void AtExit()
-{
+void AtExit() {
     SaveSets();
     FreeTokens();
     FreeSets();
-    if(!*GetMemAllocCount())
+    if (!*GetMemAllocCount())
         printf("Memory deallocated");
     else
         printf("MEMORY LEAK (%d)", *GetMemAllocCount());
 }
 
-int main()
-{
+int main() {
     atexit(AtExit);
     LoadSets();
     char s[1000];
     RedrawPage();
-    while(1) {
+    while (1) {
         CheckExceptions();
         GetInput(s);
-        if(s[0]=='`')
+        if (s[0] == '`')
             break;
-        if(TryExecute(s))
+        if (TryExecute(s))
             RedrawPage();
     }
 }
