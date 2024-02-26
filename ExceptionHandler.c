@@ -28,7 +28,7 @@ void* ThrowException(int exCode, int position)
     return 0;
 }
 
-void CheckException()
+void CheckExceptions()
 {
     exceptionCode = 0;
 }

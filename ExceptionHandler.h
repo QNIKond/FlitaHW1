@@ -10,4 +10,4 @@ const char* GetExceptionInfo(int* position);
 
 void* ThrowException(int exCode, int position);
 
-void CheckException();
+void CheckExceptions();

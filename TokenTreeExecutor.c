@@ -1,6 +1,8 @@
 #include "TokenTreeExecutor.h"
 #include "Token.h"
+#include "SyntaxAnalyzer.h"
 #include "ExceptionHandler.h"
+#include "Interface.h"
 
 Set* ExecAnd(Set* lvalue, Set* rvalue)
 {
@@ -88,4 +90,22 @@ Set* ExecuteTree(Token* node)
     Set* lvalue = ExecuteTree(node->lvalue); CHECKEX
     Set* rvalue = ExecuteTree(node->rvalue); CHECKEX
     return Execute(lvalue,rvalue, node);
+}
+
+Set* TryExecute(char* s)
+{
+    Token* tree = BuildTokenTree(s);
+    if (IsException()) {
+        ShowExceptionMessage();
+        ClearAnonymousAndEmptySets();
+        return 0;
+    }
+    Set* set = ExecuteTree(tree);
+    if (IsException()) {
+        ShowExceptionMessage();
+        ClearAnonymousAndEmptySets();
+        return 0;
+    }
+    ClearAnonymousAndEmptySets();
+    return set;
 }
