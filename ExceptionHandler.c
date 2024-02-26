@@ -2,7 +2,7 @@
 
 
 char* exceptionMessages[] = {"", "Expected number","Missing argument","Uknown lexem",
-                             "Expected named set", "Expected operator"};
+                             "Expected named set", "Expected operator", "Number is too big"};
 
 int exceptionCode = 0;
 int exceptionPosition;

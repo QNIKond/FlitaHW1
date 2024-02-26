@@ -37,12 +37,17 @@ int TryNumber(char** end, int* number)
     if(!ISNUM(**end))
         return 0;
     Strip(end);
-    *number = 0;
+    long long num = 0;
     while(ISNUM(**end))
     {
-        *number = (*number)*10 + **end - (int)'0';
+        num = num*10 + **end - (int)'0';
         ++(*end);
+        if(num >  2147483646) {
+            ThrowException(6, *end - lineStart - 5);
+            return 0;
+        }
     }
+    *number = num;
     return 1;
 }
 

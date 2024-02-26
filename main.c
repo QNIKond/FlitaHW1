@@ -21,9 +21,12 @@ void PrintErrorMessage(const char* prefix)
 
 void SaveSets()
 {
-    FILE* f = fopen("sets.txt","w");
     ClearAnonymousAndEmptySets();
     const Set* sets = GetSetsTable();
+    if(!sets)
+        return;
+
+    FILE* f = fopen("sets.txt","w");
     while (sets) {
         fprintf(f, "%s = {%d", sets->name, sets->data[0]);
         for (int i = 1; i < sets->filled; ++i) {
@@ -73,7 +76,6 @@ void AtExit()
 void PrintSets()
 {
     const Set* set = GetSetsTable();
-    //system("cls");
     printf("----------------------\n");
     printf("Sets list:\n\n");
     while (set) {
@@ -86,18 +88,17 @@ void PrintSets()
         fflush(stdout);
         set = set->nextSet;
     }
-    printf("----------------------\n");
+    printf("----------------------\n\n");
     fflush(stdout);
 }
 
 int main()
 {
-
     atexit(AtExit);
     LoadSets();
-    //char s[100] = "Art = {}";
     char s[1000];
     while(1) {
+        system("cls");
         PrintSets();
         CheckException();
         fgets(s,1000,stdin);
