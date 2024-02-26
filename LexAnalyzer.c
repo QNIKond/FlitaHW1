@@ -6,15 +6,24 @@
 #define ISLETTERORNUM(X) (ISLETTER(X) || ISNUM(X))
 
 char* lexems[TTCount] = {0};
+char* lineStart;
 
 void BuildLexemsArray()
 {
     lexems[TTOpenBracket] = "(";
     lexems[TTCloseBracket] = ")";
     lexems[TTEqual] = "=";
+    lexems[TTEqualExcept] = "/=";
+    lexems[TTEqualOr] = "|=";
+    lexems[TTEqualAnd] = "&=";
     lexems[TTExcept] = "/";
     lexems[TTOr] = "|";
     lexems[TTAnd] = "&";
+}
+
+void NewLine(char* start)
+{
+    lineStart = start;
 }
 
 void Strip(char** head)
@@ -61,7 +70,7 @@ Token* TryConstants(char** head)
             *head = end;
             return CreateToken(TTVariable, set);
         } else {
-            THROWEX(1, "number")
+            THROWEX(1, *head - lineStart)
         }
     }
 
@@ -70,7 +79,7 @@ Token* TryConstants(char** head)
     {
         TrySymbol(&end,','); CHECKEX
         if(!TryNumber(&end, &nextNumber))
-            THROWEX(1, "number")
+            THROWEX(1,  *head - lineStart)
         PlaceNumberInSet(set, nextNumber);
     }
     *head = end + 1;
@@ -118,6 +127,7 @@ Token* TryKeyWords(char** head)
 Token* GetNextToken(char** head)
 {
     Strip(head);
+    char* start = *head;
     if(**head==0)
         return CreateToken(TTEOF,0);
 
@@ -127,6 +137,9 @@ Token* GetNextToken(char** head)
     if (!nextToken)
         nextToken = TryVariables(head);
     if (!nextToken)
-        THROWEX(3, 0)
+        THROWEX(3,  *head - lineStart)
+    int t =     (start - lineStart);
+    int k = (*head - start);
+    nextToken->lexemPosition = t + k/2;
     return nextToken;
 }

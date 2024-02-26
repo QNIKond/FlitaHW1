@@ -7,7 +7,7 @@ Token* CreateToken(TokenType type, Set* set)
 {
     Token* newToken = malloc(sizeof(Token));
     //++mlocCount;
-    Token toAssign = {0,0,0,0,type,set,lastCreatedToken};
+    Token toAssign = {0,0,0,0,type,set,0,lastCreatedToken};
     *newToken =  toAssign;
 
     lastCreatedToken = newToken;

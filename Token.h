@@ -7,6 +7,9 @@ typedef enum
     TTCloseBracket,
 
     TTEqual,
+    TTEqualExcept,
+    TTEqualOr,
+    TTEqualAnd,
     TTExcept,
     TTOr,
     TTAnd,
@@ -27,6 +30,8 @@ typedef struct TOKEN
     int priority;
     TokenType type;
     Set* set;
+
+    int lexemPosition;
 
     struct TOKEN* prevCreated;
 } Token;

@@ -28,10 +28,10 @@ void AddToTokenTree(Token* lastToken, Token* newToken)
 
 Token* BuildTokenTree(char* head)
 {
+    NewLine(head);
     int priority = 0;
     Token* lastToken = 0;
     Token* nextToken = GetNextToken(&head); CHECKEX
-
     while(nextToken->type != TTEOF)
     {
         if((nextToken->type == TTOpenBracket) || (nextToken->type == TTCloseBracket))
@@ -45,7 +45,8 @@ Token* BuildTokenTree(char* head)
         lastToken = nextToken;
         nextToken = GetNextToken(&head); CHECKEX
     }
-    while(lastToken->prevToken)
-        lastToken = lastToken->prevToken;
+    if (lastToken)
+        while(lastToken->prevToken)
+            lastToken = lastToken->prevToken;
     return lastToken;
 }

@@ -72,7 +72,7 @@ void PlaceNumberInSet(Set* set, int n)
     if(set->size - set->filled <= 2)
     {
         set->size *= 2;
-        set->data = realloc(set->data,DEFAULTSIZE*sizeof(int));
+        set->data = realloc(set->data,set->size*sizeof(int));
     }
     int* ptr = set->data;
     while ((*ptr < n) && (ptr - set->data < set->filled))
@@ -102,7 +102,7 @@ void ReplaceData(Set* set, Set* source)
 {
     if(set->data) {
         if (source->size > set->size) {
-            realloc(set->data, source->size * sizeof(int));
+            set->data = realloc(set->data, source->size * sizeof(int));
             set->size = source->size;
         }
     }

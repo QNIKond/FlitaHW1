@@ -4,14 +4,17 @@
 #include "TokenTreeExecutor.h"
 #include "ExceptionHandler.h"
 
+
 void PrintErrorMessage(const char* prefix)
 {
     const char* errorMessage;
     const char* errorMod;
-    char* errorPosition;
-    errorMessage = GetExceptionInfo(&errorMod,&errorPosition);
+    int errorPosition;
+    errorMessage = GetExceptionInfo(&errorPosition);
+    printf("%*s",errorPosition+2,"^\n");
+    printf("%*s",errorPosition+2,"|\n");
     printf(prefix);
-    printf(errorMessage, errorMod);
+    printf(errorMessage);
     printf("\n");
     fflush(stdout);
 }
@@ -19,11 +22,11 @@ void PrintErrorMessage(const char* prefix)
 int main()
 {
     //char s[100] = "Art = {}";
-    char s[100];
+    char s[1000];
     const Set* set;
     while(1) {
        CheckException();
-        fgets(s,100,stdin);
+        fgets(s,1000,stdin);
         if(s[0]=='`')
             break;
         Token* tree = BuildTokenTree(s);

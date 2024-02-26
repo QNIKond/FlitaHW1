@@ -1,27 +1,29 @@
 #include "ExceptionHandler.h"
 
-char* exceptionMessages[] = {"", "Expected %s","Missing argument","Uknown lexem"};
+
+char* exceptionMessages[] = {"", "Expected number","Missing argument","Uknown lexem",
+                             "Expected named set", "Expected operator"};
 
 int exceptionCode = 0;
-const char* messageMod;
+int exceptionPosition;
 
 int IsException()
 {
     return exceptionCode;
 }
 
-const char* GetExceptionInfo(const char** mod, char** position)
+const char* GetExceptionInfo(int* position)
 {
-    *mod = messageMod;
+    *position = exceptionPosition;
     return exceptionMessages[exceptionCode];
 }
 
-void* ThrowException(int exCode,const char* mod)
+void* ThrowException(int exCode, int position)
 {
     if(!exceptionCode)
     {
         exceptionCode = exCode;
-        messageMod = mod;
+        exceptionPosition = position;
     }
     return 0;
 }

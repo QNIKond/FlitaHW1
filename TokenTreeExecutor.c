@@ -38,18 +38,34 @@ Set* ExecExcept(Set* lvalue, Set* rvalue)
     }
     return newSet;
 }
-Set* ExecEqual(Set* lvalue, Set* rvalue)
+Set* ExecEqual(Set* lvalue, Set* rvalue, int position)
 {
     if(!lvalue->name)
-        THROWEX(1,"named set")
+        THROWEX(4, position)
     ReplaceData(lvalue,rvalue);
     return lvalue;
 }
 
-Set* Execute(Set* lvalue, Set* rvalue,TokenType operator)
+Set* ExecEqualExcept(Set* lvalue, Set* rvalue, int position)
 {
-    switch (operator) {
-        case TTEqual: return ExecEqual(lvalue,rvalue);
+    return ExecEqual(lvalue, ExecExcept(lvalue,rvalue), position);
+}
+Set* ExecEqualOr(Set* lvalue, Set* rvalue, int position)
+{
+    return ExecEqual(lvalue, ExecOr(lvalue,rvalue), position);
+}
+Set* ExecEqualAnd(Set* lvalue, Set* rvalue, int position)
+{
+    return ExecEqual(lvalue, ExecAnd(lvalue,rvalue), position);
+}
+
+Set* Execute(Set* lvalue, Set* rvalue,Token* operator)
+{
+    switch (operator->type) {
+        case TTEqual: return ExecEqual(lvalue,rvalue,operator->lexemPosition);
+        case TTEqualExcept: return ExecEqualExcept(lvalue,rvalue,operator->lexemPosition);
+        case TTEqualOr: return ExecEqualOr(lvalue,rvalue,operator->lexemPosition);
+        case TTEqualAnd: return ExecEqualAnd(lvalue,rvalue,operator->lexemPosition);
         case TTExcept: return ExecExcept(lvalue,rvalue);
         case TTOr: return ExecOr(lvalue,rvalue);
         case TTAnd: return ExecAnd(lvalue,rvalue);
@@ -60,14 +76,16 @@ Set* Execute(Set* lvalue, Set* rvalue,TokenType operator)
 void TestNode(Token* node){}
 Set* ExecuteTree(Token* node)
 {
+    if(!node)
+        return 0;
     if(node->type==TTVariable) {
         if (node->lvalue || node->rvalue)
-            THROWEX(1,"operator")
+            THROWEX(5,node->lexemPosition)
         return node->set;
     }
     if(!node->lvalue || !node->rvalue )
-        THROWEX(2,0)
+        THROWEX(2,node->lexemPosition)
     Set* lvalue = ExecuteTree(node->lvalue); CHECKEX
     Set* rvalue = ExecuteTree(node->rvalue); CHECKEX
-    return Execute(lvalue,rvalue, node->type);
+    return Execute(lvalue,rvalue, node);
 }
