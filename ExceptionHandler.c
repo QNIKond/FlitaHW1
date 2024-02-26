@@ -1,5 +1,6 @@
 #include "ExceptionHandler.h"
 
+int memAllocCount = 0;
 
 char* exceptionMessages[] = {"", "Expected number","Missing argument","Uknown lexem",
                              "Expected named set", "Expected operator", "Number is too big"};
@@ -31,4 +32,9 @@ void* ThrowException(int exCode, int position)
 void CheckExceptions()
 {
     exceptionCode = 0;
+}
+
+int* GetMemAllocCount()
+{
+    return &memAllocCount;
 }

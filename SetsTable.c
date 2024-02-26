@@ -1,5 +1,6 @@
 #include "SetsTable.h"
 #include <malloc.h>
+#include "ExceptionHandler.h"
 
 #define DEFAULTSIZE 16
 
@@ -7,26 +8,13 @@ Set* setsTable = 0;
 
 Set* CreateSet(char* name)
 {
-    Set* set = malloc(sizeof(Set));
-    Set* lastSet = setsTable;
-
-    //++mlocCount;
+    Set* set = malloc(sizeof(Set)); MEMALCOUNT
     set->name = name;
-    set->data = calloc(DEFAULTSIZE,sizeof(int));
+    set->data = calloc(DEFAULTSIZE,sizeof(int)); MEMALCOUNT
     set->filled = 0;
     set->size = DEFAULTSIZE;
-    set->nextSet = 0;
-
-    if(!setsTable)
-    {
-        setsTable = set;
-    }
-    else
-    {
-        while(lastSet->nextSet)
-            lastSet = lastSet->nextSet;
-        lastSet->nextSet = set;
-    }
+    set->prevSet = setsTable;
+    setsTable = set;
     return set;
 }
 
@@ -34,8 +22,7 @@ const Set* GetSetsTable() {return setsTable;}
 
 char* CopyStr(char* start, int length)
 {
-    char* str = calloc(length+1,sizeof(char));
-    //++mlocCount;
+    char* str = calloc(length+1,sizeof(char)); MEMALCOUNT
     for(int i = 0;i < length;++i)
         str[i] = start[i];
     str[length] = 0;
@@ -60,7 +47,7 @@ Set* FindSet(char* name, int length)
                 result = currentSet;
             }
         }
-        currentSet = currentSet->nextSet;
+        currentSet = currentSet->prevSet;
     }
     if (!result)
         result = CreateSet(CopyStr(name,length));
@@ -92,7 +79,7 @@ Set* CreateUnnamedCopy(Set* set)
     newSet->filled = set->filled;
     newSet->size = set->size;
 
-    newSet->data = calloc(newSet->size,sizeof(int));
+    newSet->data = calloc(newSet->size,sizeof(int)); MEMALCOUNT
     for(int i = 0; i < set->filled; ++i)
         newSet->data[i] = set->data[i];
     return newSet;
@@ -107,7 +94,7 @@ void ReplaceData(Set* set, Set* source)
         }
     }
     else {
-        set->data = calloc(source->size, sizeof(int));
+        set->data = calloc(source->size, sizeof(int)); MEMALCOUNT
         set->size = source->size;
     }
     for(int i = 0; i < source->filled; ++i)
@@ -119,20 +106,22 @@ void FreeSet(Set* set)
 {
     if (set == setsTable)
         setsTable = 0;
-    if(set->name)
-        free(set->name);
-    if(set->data)
-        free(set->data);
-    free(set);
+    if(set->name){
+        free(set->name); MEMFREECOUNT
+    }
+    if(set->data) {
+        free(set->data); MEMFREECOUNT
+    }
+    free(set); MEMFREECOUNT
 }
 
-void PopSet(Set* prev,Set** set)
+void PopSet(Set* next,Set** set)
 {
-    Set* nextSet = (*set)->nextSet;
+    Set* prevSet = (*set)->prevSet;
     FreeSet(*set);
-    if(prev)
-        prev->nextSet = nextSet;
-    *set = nextSet;
+    if(next)
+        next->prevSet = prevSet;
+    *set = prevSet;
 }
 
 void ClearAnonymousAndEmptySets()
@@ -143,26 +132,26 @@ void ClearAnonymousAndEmptySets()
     if(!setsTable)
         return;
 
-    Set* prev = setsTable;
-    Set* set = setsTable->nextSet;
+    Set* next = setsTable;
+    Set* set = setsTable->prevSet;
     while(set)
     {
         if((!set->filled)||(!set->name))
         {
-            PopSet(prev, &set);
+            PopSet(next, &set);
         }
         else if(set)
         {
-            prev = set;
-            set = set->nextSet;
+            next = set;
+            set = set->prevSet;
         }
     }
 }
 
 void RecursivelyFreeSets(Set* set)
 {
-    if(set->nextSet)
-        RecursivelyFreeSets(set->nextSet);
+    if(set->prevSet)
+        RecursivelyFreeSets(set->prevSet);
     FreeSet(set);
 }
 

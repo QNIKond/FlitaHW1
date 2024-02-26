@@ -17,7 +17,7 @@ void PrintSets()
         }
         printf("}\n");
         fflush(stdout);
-        set = set->nextSet;
+        set = set->prevSet;
     }
     printf("----------------------\n\n");
     fflush(stdout);

@@ -18,7 +18,7 @@ void SaveSets()
             fprintf(f,", %d", sets->data[i]);
         }
         fprintf(f,"}\n");
-        sets = sets->nextSet;
+        sets = sets->prevSet;
     }
     fclose(f);
 }
@@ -39,7 +39,10 @@ void AtExit()
     SaveSets();
     FreeTokens();
     FreeSets();
-    printf("Memory deallocated");
+    if(!*GetMemAllocCount())
+        printf("Memory deallocated");
+    else
+        printf("MEMORY LEAK (%d)", *GetMemAllocCount());
 }
 
 int main()

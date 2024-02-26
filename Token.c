@@ -1,12 +1,12 @@
 #include "Token.h"
 #include <malloc.h>
+#include "ExceptionHandler.h"
 
 static Token* lastCreatedToken = 0;
 
 Token* CreateToken(TokenType type, Set* set)
 {
-    Token* newToken = malloc(sizeof(Token));
-    //++mlocCount;
+    Token* newToken = malloc(sizeof(Token)); MEMALCOUNT
     Token toAssign = {0,0,0,0,type,set,0,lastCreatedToken};
     *newToken =  toAssign;
 
@@ -22,7 +22,7 @@ void RecursivelyFreeTokens(Token* token)
         return;
     if(token->prevCreated != 0)
         RecursivelyFreeTokens(token->prevCreated);
-    free(token);
+    free(token); MEMFREECOUNT
     //--mlocCount;
 }
 
