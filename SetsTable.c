@@ -117,6 +117,8 @@ void ReplaceData(Set* set, Set* source)
 
 void FreeSet(Set* set)
 {
+    if (set == setsTable)
+        setsTable = 0;
     if(set->name)
         free(set->name);
     if(set->data)

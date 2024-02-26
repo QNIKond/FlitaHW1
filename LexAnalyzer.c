@@ -28,7 +28,7 @@ void NewLine(char* start)
 
 void Strip(char** head)
 {
-    while((**head==' ')||(**head=='\n')||(**head=='\t'))
+    while((**head==' ')||(**head=='\t'))
         ++(*head);
 }
 
@@ -128,7 +128,7 @@ Token* GetNextToken(char** head)
 {
     Strip(head);
     char* start = *head;
-    if(**head==0)
+    if((**head==0) || (**head=='\n'))
         return CreateToken(TTEOF,0);
 
     Token* nextToken = TryKeyWords(head);

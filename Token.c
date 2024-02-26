@@ -16,6 +16,10 @@ Token* CreateToken(TokenType type, Set* set)
 
 void RecursivelyFreeTokens(Token* token)
 {
+    if(token == lastCreatedToken)
+        lastCreatedToken = 0;
+    if(!token)
+        return;
     if(token->prevCreated != 0)
         RecursivelyFreeTokens(token->prevCreated);
     free(token);
