@@ -14,11 +14,18 @@ assignation(= |= &= /=), brackets and constants({1,2,3}).
 -You can only put integer values in constants
 
 EXAMPLES:
+
 Apple = {1, 2, 3, 4, 5}
+
 Bus = Apple \ {2,4}
+
 _et13k = Apple | Bus / Apple&Bus
+
 E = {1,2,3}
+
 E &= Bus
+
 R=(E|Apple)&Bus
+
 
 Type "help" to see this screen in program
