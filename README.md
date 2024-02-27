@@ -17,7 +17,7 @@ EXAMPLES:
 
 Apple = {1, 2, 3, 4, 5}
 
-Bus = Apple \ {2,4}
+Bus = Apple / {2,4}
 
 _et13k = Apple | Bus / Apple&Bus
 
