@@ -2,7 +2,7 @@
 
 typedef struct SET {
     char *name;
-    double *data;
+    int *data;
     int filled;
     int size;
 
@@ -16,7 +16,7 @@ const Set *GetSetsTable();
 
 Set *FindSet(char *name, int length);
 
-void PlaceNumberInSet(Set *set, double n);
+void PlaceNumberInSet(Set *set, int n);
 
 Set *CreateUnnamedCopy(Set *set);
 

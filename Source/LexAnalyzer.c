@@ -29,9 +29,8 @@ void Strip(char **head) {
         ++(*head);
 }
 
-int TryNumber(char **end, double *number) {
+int TryNumber(char **end, int *number) {
     int sign = 1;
-    double fraction = 0;
     if (**end == '-')
     {
         sign = -1;
@@ -45,20 +44,11 @@ int TryNumber(char **end, double *number) {
         num = num * 10 + **end - (int) '0';
         ++(*end);
         if (num > 2147483646) {
-            ThrowException(6, (int)(*end - lineStart) - 5);
+            ThrowException(6, *end - lineStart - 5);
             return 0;
         }
     }
-    if(**end == '.')
-    {
-        ++(*end);
-        if(TryNumber(end,&fraction))
-        {
-            while (fraction>=1)
-                fraction /= 10;
-        }
-    }
-    *number = ((double)num + fraction)*sign;
+    *number = (int)num*sign;
     return 1;
 }
 
@@ -73,7 +63,7 @@ int TrySymbol(char **head, char symbol) {
 }
 
 Token *TryConstants(char **head) {
-    double nextNumber = 0;
+    int nextNumber = 0;
     char *end = *head;
     if (!TrySymbol(&end, '{'))
         return 0;
@@ -89,10 +79,10 @@ Token *TryConstants(char **head) {
 
     PlaceNumberInSet(set, nextNumber);
     while (*end != '}') {
-        if (!TrySymbol(&end, ','))
-            THROWEX(7, *head - lineStart)
+        if(!TrySymbol(&end, ','))
+            THROWEX(7, end - lineStart);
         if (!TryNumber(&end, &nextNumber))
-            THROWEX(1, *head - lineStart)
+            THROWEX(1, end - lineStart)
         PlaceNumberInSet(set, nextNumber);
     }
     *head = end + 1;
@@ -105,7 +95,7 @@ Token *TryVariables(char **head) {
     char *end = *head;
     while (ISLETTERORNUM(*(end)))
         ++end;
-    Set *set = FindSet(*head, end - *head);
+    Set *set = FindSet(*head, (int)(end - *head));
 
     *head = end;
     return CreateToken(TTVariable, set);
