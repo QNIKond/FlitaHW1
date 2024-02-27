@@ -22,7 +22,6 @@ void PrintNum(FILE *stream,double num)
 
 void PrintSets(FILE *stream) {
     const Set *set = GetSetsTable();
-
     while (set) {
         fprintf(stream, "%s = {", set->name);
         PrintNum(stream,set->data[0]);
@@ -44,6 +43,23 @@ void RedrawPage() {
     printf("Sets list:\n\n");
     PrintSets(stdout);
     printf("----------------------\n\n");
+    printf("expression:\n\n");
+}
+
+void DrawHelpPage()
+{
+    system("cls");
+    FILE* f = fopen("help.txt","r");
+    if(!f) {
+        printf("\nMissing help.txt file\n");
+        return;
+    }
+    char msg[1000];
+    while(fgets(msg, 1000, f))
+        printf("%s",msg);
+    fclose(f);
+    getchar();
+    RedrawPage();
 }
 
 void ShowExceptionMessage() {

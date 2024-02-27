@@ -9,6 +9,7 @@ char *lexems[TTCount] = {0};
 char *lineStart;
 
 void BuildLexemsArray() {
+    lexems[TTHelp] = "help";
     lexems[TTOpenBracket] = "(";
     lexems[TTCloseBracket] = ")";
     lexems[TTEqual] = "=";
@@ -137,8 +138,6 @@ Token *GetNextToken(char **head) {
         nextToken = TryVariables(head);
     if (!nextToken)
         THROWEX(3, *head - lineStart)
-    int t = (start - lineStart);
-    int k = (*head - start);
-    nextToken->lexemPosition = t + k / 2;
+    nextToken->lexemPosition = (start - lineStart) + (*head - start) / 2;
     return nextToken;
 }

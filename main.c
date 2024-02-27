@@ -37,7 +37,7 @@ void AtExit() {
 }
 
 int main() {
-
+    DrawHelpPage();
     atexit(AtExit);
     LoadSets();
     char s[1000];

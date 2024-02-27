@@ -2,7 +2,7 @@
 #include "../Headers/Structures/Token.h"
 #include "../Headers/Builders/LexAnalyzer.h"
 #include "../Headers/ExceptionHandler.h"
-
+#include "../Headers/Interface.h"
 void AddToTokenTree(Token *lastToken, Token *newToken) {
 
     if (lastToken == 0)
@@ -26,6 +26,11 @@ Token *BuildTokenTree(char *head) {
     Token *lastToken = 0;
     Token *nextToken = GetNextToken(&head);
     CHECKEX
+    if(nextToken->type == TTHelp)
+    {
+        DrawHelpPage();
+        return 0;
+    }
     while (nextToken->type != TTEOF) {
         if ((nextToken->type == TTOpenBracket) || (nextToken->type == TTCloseBracket)) {
             priority += nextToken->type == TTOpenBracket ? 1 : -1;

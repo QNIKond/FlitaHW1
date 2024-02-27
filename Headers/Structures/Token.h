@@ -3,6 +3,7 @@
 #include "SetsTable.h"
 
 typedef enum {
+    TTHelp,
     TTOpenBracket,
     TTCloseBracket,
 

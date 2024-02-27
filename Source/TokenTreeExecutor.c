@@ -83,6 +83,8 @@ void TestNode(Token *node) {}
 Set *ExecuteTree(Token *node) {
     if (!node)
         return 0;
+    if(node->type == TTHelp)
+        THROWEX(8, node->lexemPosition)
     if (node->type == TTVariable) {
         if (node->lvalue || node->rvalue)
             THROWEX(5, node->lexemPosition)
