@@ -1,4 +1,7 @@
 #pragma once
+#include <stdio.h>
+
+void PrintSets(FILE *stream);
 
 void RedrawPage();
 

@@ -9,21 +9,15 @@ void SaveSets() {
     const Set *sets = GetSetsTable();
     if (!sets)
         return;
-
     FILE *f = fopen("sets.txt", "w");
-    while (sets) {
-        fprintf(f, "%s = {%f", sets->name, sets->data[0]);
-        for (int i = 1; i < sets->filled; ++i) {
-            fprintf(f, ", %f", sets->data[i]);
-        }
-        fprintf(f, "}\n");
-        sets = sets->prevSet;
-    }
+    PrintSets(f);
     fclose(f);
 }
 
 void LoadSets() {
     FILE *f = fopen("sets.txt", "r");
+    if(!f)
+        return;
     char s[1000];
     while (fgets(s, 1000, f)) {
         if(!TryExecute(s))
@@ -43,6 +37,7 @@ void AtExit() {
 }
 
 int main() {
+
     atexit(AtExit);
     LoadSets();
     char s[1000];

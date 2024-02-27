@@ -4,37 +4,46 @@
 #include "../Headers/Structures/SetsTable.h"
 #include "../Headers/ExceptionHandler.h"
 
-void PrintNum(double num)
+void PrintNum(FILE *stream,double num)
 {
-    if(num - (int)num)
-        printf("%.3f", num);
-    else
-        printf("%d", (int)num);
-    fflush(stdout);
+    fprintf(stream, "%d", (int)num);
+    if(!(num - (int)num))
+        return;
+    fprintf(stream, ".");
+    if(num < 0)
+        num *= -1;
+    while(num)
+    {
+        fprintf(stream, "%d", (int)(num*10)%10);
+        num -= (int)num;
+        num *= 10;
+    }
 }
 
-void PrintSets() {
+void PrintSets(FILE *stream) {
     const Set *set = GetSetsTable();
-    printf("----------------------\n");
-    printf("Sets list:\n\n");
+
     while (set) {
-        printf("%s = {", set->name);
-        PrintNum(set->data[0]);
+        fprintf(stream, "%s = {", set->name);
+        PrintNum(stream,set->data[0]);
         for (int i = 1; i < set->filled; ++i) {
-            printf(", ");
-            PrintNum(set->data[i]);
+            fprintf(stream,", ");
+            PrintNum(stream,set->data[i]);
         }
-        printf("}\n");
+        fprintf(stream, "}\n");
         fflush(stdout);
         set = set->prevSet;
     }
-    printf("----------------------\n\n");
+
     fflush(stdout);
 }
 
 void RedrawPage() {
     system("cls");
-    PrintSets();
+    printf("----------------------\n");
+    printf("Sets list:\n\n");
+    PrintSets(stdout);
+    printf("----------------------\n\n");
 }
 
 void ShowExceptionMessage() {
