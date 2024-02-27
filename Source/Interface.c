@@ -31,7 +31,7 @@ void PrintSets(FILE *stream) {
         }
         fprintf(stream, "}\n");
         fflush(stdout);
-        set = set->prevSet;
+        set = set->nextSet;
     }
 
     fflush(stdout);

@@ -23,7 +23,6 @@ void RecursivelyFreeTokens(Token *token) {
         RecursivelyFreeTokens(token->prevCreated);
     free(token);
     MEMFREECOUNT
-    //--mlocCount;
 }
 
 void FreeTokens() {

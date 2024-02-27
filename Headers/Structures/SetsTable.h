@@ -7,7 +7,7 @@ typedef struct SET {
     int size;
 
 
-    struct SET *prevSet;
+    struct SET *nextSet;
 } Set;
 
 Set *CreateSet(char *name);
