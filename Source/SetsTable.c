@@ -126,7 +126,7 @@ void PopSet(Set *prev, Set **set) {
 }
 
 void ClearAnonymousAndEmptySets() {
-    while (setsTable && (!setsTable->filled) || (!setsTable->name))
+    while (setsTable && ((!setsTable->filled) || (!setsTable->name)))
         PopSet(0, &setsTable);
 
     if (!setsTable)
