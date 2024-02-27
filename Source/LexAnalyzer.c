@@ -29,7 +29,14 @@ void Strip(char **head) {
         ++(*head);
 }
 
-int TryNumber(char **end, int *number) {
+int TryNumber(char **end, double *number) {
+    int sign = 1;
+    double fraction = 0;
+    if (**end == '-')
+    {
+        sign = -1;
+        ++(*end);
+    }
     if (!ISNUM(**end))
         return 0;
     Strip(end);
@@ -38,11 +45,20 @@ int TryNumber(char **end, int *number) {
         num = num * 10 + **end - (int) '0';
         ++(*end);
         if (num > 2147483646) {
-            ThrowException(6, *end - lineStart - 5);
+            ThrowException(6, (int)(*end - lineStart) - 5);
             return 0;
         }
     }
-    *number = num;
+    if(**end == '.')
+    {
+        ++(*end);
+        if(TryNumber(end,&fraction))
+        {
+            while (fraction>=1)
+                fraction /= 10;
+        }
+    }
+    *number = ((double)num + fraction)*sign;
     return 1;
 }
 
@@ -57,7 +73,7 @@ int TrySymbol(char **head, char symbol) {
 }
 
 Token *TryConstants(char **head) {
-    int nextNumber = 0;
+    double nextNumber = 0;
     char *end = *head;
     if (!TrySymbol(&end, '{'))
         return 0;
@@ -73,8 +89,8 @@ Token *TryConstants(char **head) {
 
     PlaceNumberInSet(set, nextNumber);
     while (*end != '}') {
-        TrySymbol(&end, ',');
-        CHECKEX
+        if (!TrySymbol(&end, ','))
+            THROWEX(7, *head - lineStart)
         if (!TryNumber(&end, &nextNumber))
             THROWEX(1, *head - lineStart)
         PlaceNumberInSet(set, nextNumber);

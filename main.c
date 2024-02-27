@@ -12,9 +12,9 @@ void SaveSets() {
 
     FILE *f = fopen("sets.txt", "w");
     while (sets) {
-        fprintf(f, "%s = {%d", sets->name, sets->data[0]);
+        fprintf(f, "%s = {%f", sets->name, sets->data[0]);
         for (int i = 1; i < sets->filled; ++i) {
-            fprintf(f, ", %d", sets->data[i]);
+            fprintf(f, ", %f", sets->data[i]);
         }
         fprintf(f, "}\n");
         sets = sets->prevSet;
@@ -26,7 +26,8 @@ void LoadSets() {
     FILE *f = fopen("sets.txt", "r");
     char s[1000];
     while (fgets(s, 1000, f)) {
-        TryExecute(s);
+        if(!TryExecute(s))
+            break;
     }
     fclose(f);
 }

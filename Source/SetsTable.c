@@ -52,16 +52,16 @@ Set *FindSet(char *name, int length) {
     return result;
 }
 
-void PlaceNumberInSet(Set *set, int n) {
+void PlaceNumberInSet(Set *set, double n) {
     if (set->size - set->filled <= 2) {
         set->size *= 2;
-        set->data = realloc(set->data, set->size * sizeof(int));
+        set->data = realloc(set->data, set->size * sizeof(double));
     }
-    int *ptr = set->data;
+    double *ptr = set->data;
     while ((*ptr < n) && (ptr - set->data < set->filled))
         ++ptr;
     if ((ptr - set->data == set->filled) || (*ptr != n)) {
-        for (int *i = set->data + set->filled; i > ptr; --i)
+        for (double *i = set->data + set->filled; i > ptr; --i)
             *i = *(i - 1);
         *ptr = n;
         ++(set->filled);
@@ -73,7 +73,7 @@ Set *CreateUnnamedCopy(Set *set) {
     newSet->filled = set->filled;
     newSet->size = set->size;
 
-    newSet->data = calloc(newSet->size, sizeof(int));
+    newSet->data = calloc(newSet->size, sizeof(double));
     MEMALCOUNT
     for (int i = 0; i < set->filled; ++i)
         newSet->data[i] = set->data[i];
@@ -83,11 +83,11 @@ Set *CreateUnnamedCopy(Set *set) {
 void ReplaceData(Set *set, Set *source) {
     if (set->data) {
         if (source->size > set->size) {
-            set->data = realloc(set->data, source->size * sizeof(int));
+            set->data = realloc(set->data, source->size * sizeof(double));
             set->size = source->size;
         }
     } else {
-        set->data = calloc(source->size, sizeof(int));
+        set->data = calloc(source->size, sizeof(double));
         MEMALCOUNT
         set->size = source->size;
     }

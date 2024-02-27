@@ -4,15 +4,25 @@
 #include "../Headers/Structures/SetsTable.h"
 #include "../Headers/ExceptionHandler.h"
 
+void PrintNum(double num)
+{
+    if(num - (int)num)
+        printf("%.3f", num);
+    else
+        printf("%d", (int)num);
+    fflush(stdout);
+}
+
 void PrintSets() {
     const Set *set = GetSetsTable();
     printf("----------------------\n");
     printf("Sets list:\n\n");
     while (set) {
-        printf("%s = {%d", set->name, set->data[0]);
+        printf("%s = {", set->name);
+        PrintNum(set->data[0]);
         for (int i = 1; i < set->filled; ++i) {
-            printf(", %d", set->data[i]);
-            fflush(stdout);
+            printf(", ");
+            PrintNum(set->data[i]);
         }
         printf("}\n");
         fflush(stdout);
